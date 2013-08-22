@@ -25,13 +25,22 @@ defmodule Streamers do
     do_extract_m3u8(pid, [])
   end
 
-  def do_extraxt_m3u8(pid, acc)
+  defp do_extract_m3u8(pid, acc)
     case IO.readline(pid) do
-      :eof -> figure_this)out
+      :eof -> Enum.reverse(acc)
       stream_inf ->
         path = IO.readline(pid)
         do_extract_m3u8(pid, stream_inf, path, acc)
     end
+  end
+
+  defp do_extract_m3u8(pid, stream_inf, path, acc)  do
+    
+    # We expect "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=110000"
+
+    << "#EXT-X-STREAM-INF:PROGRAM-ID=", program_id, ",BANDWIDTH=", bandwidth :: binary >> = stream_inf
+    record = M3U8[program_id: program_id, path: path, bandwidth: bandwidth]
+    do_extract_m3u8(pid, [record|acc])
   end
 
   defp is_index?(file) do
